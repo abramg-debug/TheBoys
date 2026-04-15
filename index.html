@@ -190,22 +190,9 @@ h1{
   filter:drop-shadow(0 12px 25px rgba(0,0,0,.5));
   will-change:transform;
 }
-
-@media (max-width: 900px){
-  .float-logo{ width:88px; }
-}
-
-@media (max-width: 640px){
-  .float-logo{ width:68px; }
-  .card{ padding:24px 18px 20px; }
-}
 </style>
 </head>
 <body>
-
-<img id="logo1" class="float-logo" src="logo.png" alt="Logo 1">
-<img id="logo2" class="float-logo" src="logo2.png" alt="Logo 2">
-<img id="logo3" class="float-logo" src="logo3.png" alt="Logo 3">
 
 <div class="wrap">
   <div class="card" id="card">
@@ -291,6 +278,8 @@ class FloatingLogo {
     this.flyInFromY = opts.flyInFromY;
     this.ready = false;
 
+    this.el.style.width = this.size + "px";
+
     this.el.addEventListener("load", () => {
       this.ready = true;
       this.measure();
@@ -312,8 +301,8 @@ class FloatingLogo {
     if (!this.ready) return;
     if (!this.w || !this.h) this.measure();
 
-    const maxX = window.innerWidth - this.w - this.margin;
-    const maxY = window.innerHeight - this.h - this.margin;
+    const maxX = Math.max(this.margin, window.innerWidth - this.w - this.margin);
+    const maxY = Math.max(this.margin, window.innerHeight - this.h - this.margin);
 
     const flyElapsed = now - this.flyInStart;
     if (flyElapsed < this.flyInDuration) {
@@ -350,44 +339,68 @@ class FloatingLogo {
   }
 }
 
-const logos = [
-  new FloatingLogo(document.getElementById("logo1"), {
-    size: 110,
-    startX: Math.max(20, window.innerWidth * 0.08),
-    startY: Math.max(20, window.innerHeight * 0.12),
-    vx: 1.25,
-    vy: 0.95,
-    rot: -8,
-    rotSpeed: 0.06,
-    flyInFromX: -180,
-    flyInFromY: 40,
-    flyInDuration: 1400
-  }),
-  new FloatingLogo(document.getElementById("logo2"), {
-    size: 110,
-    startX: Math.max(20, window.innerWidth * 0.80),
-    startY: Math.max(20, window.innerHeight * 0.18),
-    vx: -1.12,
-    vy: 0.88,
-    rot: 10,
-    rotSpeed: -0.05,
-    flyInFromX: window.innerWidth + 180,
-    flyInFromY: 80,
-    flyInDuration: 1600
-  }),
-  new FloatingLogo(document.getElementById("logo3"), {
-    size: 110,
-    startX: Math.max(20, window.innerWidth * 0.16),
-    startY: Math.max(20, window.innerHeight * 0.72),
-    vx: 1.05,
-    vy: -0.92,
-    rot: -6,
-    rotSpeed: 0.045,
-    flyInFromX: -160,
-    flyInFromY: window.innerHeight + 120,
-    flyInDuration: 1750
-  })
-];
+function rand(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function randSign() {
+  return Math.random() < 0.5 ? -1 : 1;
+}
+
+function createLogos(count) {
+  const logos = [];
+
+  for (let i = 0; i < count; i++) {
+    const img = document.createElement("img");
+    img.className = "float-logo";
+    img.src = "boys.png";
+    img.alt = "The Boys Logo " + (i + 1);
+    img.decoding = "async";
+    document.body.appendChild(img);
+
+    const size = rand(65, 165);
+    const startX = rand(10, Math.max(20, window.innerWidth - size - 10));
+    const startY = rand(10, Math.max(20, window.innerHeight - size - 10));
+    const speedBase = rand(0.45, 1.35);
+    const rotSpeed = rand(0.015, 0.065) * randSign();
+
+    let flyInFromX;
+    let flyInFromY;
+    const side = Math.floor(Math.random() * 4);
+
+    if (side === 0) {
+      flyInFromX = -size - rand(40, 180);
+      flyInFromY = rand(0, window.innerHeight);
+    } else if (side === 1) {
+      flyInFromX = window.innerWidth + rand(40, 180);
+      flyInFromY = rand(0, window.innerHeight);
+    } else if (side === 2) {
+      flyInFromX = rand(0, window.innerWidth);
+      flyInFromY = -size - rand(40, 180);
+    } else {
+      flyInFromX = rand(0, window.innerWidth);
+      flyInFromY = window.innerHeight + rand(40, 180);
+    }
+
+    logos.push(new FloatingLogo(img, {
+      size,
+      startX,
+      startY,
+      vx: speedBase * randSign(),
+      vy: rand(0.45, 1.35) * randSign(),
+      rot: rand(-18, 18),
+      rotSpeed,
+      flyInFromX,
+      flyInFromY,
+      flyInDuration: rand(900, 2200),
+      margin: 8
+    }));
+  }
+
+  return logos;
+}
+
+const logos = createLogos(10);
 
 function animate(now) {
   for (const logo of logos) {
@@ -399,10 +412,10 @@ function animate(now) {
 window.addEventListener("resize", () => {
   for (const logo of logos) {
     logo.measure();
-    const maxX = window.innerWidth - (logo.w || 0) - logo.margin;
-    const maxY = window.innerHeight - (logo.h || 0) - logo.margin;
-    logo.x = Math.min(Math.max(logo.margin, logo.x), Math.max(logo.margin, maxX));
-    logo.y = Math.min(Math.max(logo.margin, logo.y), Math.max(logo.margin, maxY));
+    const maxX = Math.max(logo.margin, window.innerWidth - (logo.w || logo.size) - logo.margin);
+    const maxY = Math.max(logo.margin, window.innerHeight - (logo.h || logo.size) - logo.margin);
+    logo.x = Math.min(Math.max(logo.margin, logo.x), maxX);
+    logo.y = Math.min(Math.max(logo.margin, logo.y), maxY);
   }
 });
 
