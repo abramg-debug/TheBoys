@@ -178,10 +178,8 @@ h1{
   box-shadow:0 0 20px rgba(34,197,94,.18);
 }
 
-/* floating logos */
 .float-logo{
   position:fixed;
-  width:110px;
   height:auto;
   z-index:5;
   pointer-events:none;
@@ -261,63 +259,75 @@ function updateCountdown() {
   subEl.textContent = "Premieres tonight at 8:00 PM";
 }
 
+function rand(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function randSign() {
+  return Math.random() < 0.5 ? -1 : 1;
+}
+
 class FloatingLogo {
   constructor(el, opts) {
     this.el = el;
-    this.size = opts.size || 110;
-    this.x = opts.startX || 0;
-    this.y = opts.startY || 0;
-    this.vx = opts.vx || 1.2;
-    this.vy = opts.vy || 0.9;
-    this.rot = opts.rot || 0;
-    this.rotSpeed = opts.rotSpeed || 0.05;
-    this.margin = opts.margin || 8;
-    this.flyInDuration = opts.flyInDuration || 1400;
-    this.flyInStart = performance.now();
-    this.flyInFromX = opts.flyInFromX;
-    this.flyInFromY = opts.flyInFromY;
+    this.size = opts.size;
+    this.x = opts.startX;
+    this.y = opts.startY;
+    this.vx = opts.vx;
+    this.vy = opts.vy;
+    this.rot = opts.rot;
+    this.rotSpeed = opts.rotSpeed;
+    this.margin = opts.margin || 12;
+    this.w = this.size;
+    this.h = this.size * 1.15; /* rough starting estimate */
     this.ready = false;
 
     this.el.style.width = this.size + "px";
+    this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rot}deg)`;
 
     this.el.addEventListener("load", () => {
       this.ready = true;
       this.measure();
+      this.clampToScreen();
+      this.draw();
     }, { once:true });
 
     if (this.el.complete) {
       this.ready = true;
       this.measure();
+      this.clampToScreen();
+      this.draw();
     }
   }
 
   measure() {
     const r = this.el.getBoundingClientRect();
-    this.w = r.width || this.size;
-    this.h = r.height || this.size;
+    if (r.width > 0 && r.height > 0) {
+      this.w = r.width;
+      this.h = r.height;
+    }
   }
 
-  update(now) {
-    if (!this.ready) return;
-    if (!this.w || !this.h) this.measure();
-
+  clampToScreen() {
     const maxX = Math.max(this.margin, window.innerWidth - this.w - this.margin);
     const maxY = Math.max(this.margin, window.innerHeight - this.h - this.margin);
+    this.x = Math.min(Math.max(this.margin, this.x), maxX);
+    this.y = Math.min(Math.max(this.margin, this.y), maxY);
+  }
 
-    const flyElapsed = now - this.flyInStart;
-    if (flyElapsed < this.flyInDuration) {
-      const t = flyElapsed / this.flyInDuration;
-      const e = 1 - Math.pow(1 - t, 3);
-      const cx = this.flyInFromX + (this.x - this.flyInFromX) * e;
-      const cy = this.flyInFromY + (this.y - this.flyInFromY) * e;
-      const r = this.rot * e;
-      this.el.style.transform = `translate(${cx}px, ${cy}px) rotate(${r}deg)`;
-      return;
-    }
+  draw() {
+    this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rot}deg)`;
+  }
+
+  update() {
+    if (!this.ready) return;
 
     this.x += this.vx;
     this.y += this.vy;
     this.rot += this.rotSpeed;
+
+    const maxX = Math.max(this.margin, window.innerWidth - this.w - this.margin);
+    const maxY = Math.max(this.margin, window.innerHeight - this.h - this.margin);
 
     if (this.x <= this.margin) {
       this.x = this.margin;
@@ -335,16 +345,8 @@ class FloatingLogo {
       this.vy *= -1;
     }
 
-    this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rot}deg)`;
+    this.draw();
   }
-}
-
-function rand(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
-function randSign() {
-  return Math.random() < 0.5 ? -1 : 1;
 }
 
 function createLogos(count) {
@@ -358,53 +360,32 @@ function createLogos(count) {
     img.decoding = "async";
     document.body.appendChild(img);
 
-    const size = rand(65, 165);
-    const startX = rand(10, Math.max(20, window.innerWidth - size - 10));
-    const startY = rand(10, Math.max(20, window.innerHeight - size - 10));
-    const speedBase = rand(0.45, 1.35);
-    const rotSpeed = rand(0.015, 0.065) * randSign();
-
-    let flyInFromX;
-    let flyInFromY;
-    const side = Math.floor(Math.random() * 4);
-
-    if (side === 0) {
-      flyInFromX = -size - rand(40, 180);
-      flyInFromY = rand(0, window.innerHeight);
-    } else if (side === 1) {
-      flyInFromX = window.innerWidth + rand(40, 180);
-      flyInFromY = rand(0, window.innerHeight);
-    } else if (side === 2) {
-      flyInFromX = rand(0, window.innerWidth);
-      flyInFromY = -size - rand(40, 180);
-    } else {
-      flyInFromX = rand(0, window.innerWidth);
-      flyInFromY = window.innerHeight + rand(40, 180);
-    }
+    const size = rand(70, 125);
+    const startX = rand(20, Math.max(20, window.innerWidth - size - 20));
+    const startY = rand(20, Math.max(20, window.innerHeight - size - 60));
+    const speedX = rand(0.18, 0.45) * randSign();
+    const speedY = rand(0.18, 0.45) * randSign();
 
     logos.push(new FloatingLogo(img, {
       size,
       startX,
       startY,
-      vx: speedBase * randSign(),
-      vy: rand(0.45, 1.35) * randSign(),
-      rot: rand(-18, 18),
-      rotSpeed,
-      flyInFromX,
-      flyInFromY,
-      flyInDuration: rand(900, 2200),
-      margin: 8
+      vx: speedX,
+      vy: speedY,
+      rot: rand(-10, 10),
+      rotSpeed: rand(0.01, 0.03) * randSign(),
+      margin: 12
     }));
   }
 
   return logos;
 }
 
-const logos = createLogos(10);
+const logos = createLogos(6);
 
-function animate(now) {
+function animate() {
   for (const logo of logos) {
-    logo.update(now);
+    logo.update();
   }
   requestAnimationFrame(animate);
 }
@@ -412,10 +393,8 @@ function animate(now) {
 window.addEventListener("resize", () => {
   for (const logo of logos) {
     logo.measure();
-    const maxX = Math.max(logo.margin, window.innerWidth - (logo.w || logo.size) - logo.margin);
-    const maxY = Math.max(logo.margin, window.innerHeight - (logo.h || logo.size) - logo.margin);
-    logo.x = Math.min(Math.max(logo.margin, logo.x), maxX);
-    logo.y = Math.min(Math.max(logo.margin, logo.y), maxY);
+    logo.clampToScreen();
+    logo.draw();
   }
 });
 
