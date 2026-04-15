@@ -1,1 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Countdown to Episode 3</title>
 
+<style>
+:root{
+  --bg1:#070d18;
+  --bg2:#0b1220;
+  --card:rgba(18,26,43,.88);
+  --text:#e8eefc;
+  --muted:#9fb0d8;
+  --border:rgba(255,255,255,.08);
+  --glow:#60a5fa;
+  --live:#22c55e;
+}
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+}
+
+body{
+  min-height:100vh;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  color:var(--text);
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(59,130,246,.20), transparent 30%),
+    radial-gradient(circle at 80% 30%, rgba(147,51,234,.12), transparent 28%),
+    radial-gradient(circle at 50% 85%, rgba(34,197,94,.10), transparent 25%),
+    linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+}
+
+/* subtle stars */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.35;
+  background-image:
+    radial-gradient(2px 2px at 12% 18%, rgba(255,255,255,.75) 0, transparent 55%),
+    radial-gradient(1.5px 1.5px at 25% 70%, rgba(255,255,255,.65) 0, transparent 55%),
+    radial-gradient(2px 2px at 44% 28%, rgba(255,255,255,.70) 0, transparent 55%),
+    radial-gradient(1.5px 1.5px at 61% 76%, rgba(255,255,255,.60) 0, transparent 55%),
+    radial-gradient(2px 2px at 77% 20%, rgba(255,255,255,.70) 0, transparent 55%),
+    radial-gradient(1.5px 1.5px at 88% 62%, rgba(255,255,255,.60) 0, transparent 55%),
+    radial-gradient(2px 2px at 70% 44%, rgba(255,255,255,.60) 0, transparent 55%),
+    radial-gradient(1.5px 1.5px at 33% 50%, rgba(255,255,255,.60) 0, transparent 55%);
+  animation: twinkle 5s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle{
+  from{opacity:.18}
+  to{opacity:.4}
+}
+
+.wrap{
+  position:relative;
+  z-index:20;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.card{
+  width:min(760px, 100%);
+  text-align:center;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:30px 24px 26px;
+  box-shadow:0 22px 60px rgba(0,0,0,.45);
+  backdrop-filter:blur(10px);
+}
+
+h1{
+  margin:0 0 10px;
+  font-size:clamp(32px, 5vw, 58px);
+  line-height:1.02;
+  letter-spacing:.01em;
+}
+
+.sub{
+  margin:0 0 22px;
+  color:var(--muted);
+  font-size:clamp(16px, 2.4vw, 22px);
+  font-weight:700;
+}
+
+.big{
+  margin:10px 0 10px;
+  font-size:clamp(48px, 11vw, 106px);
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-shadow:
+    0 0 8px rgba(96,165,250,.30),
+    0 0 18px rgba(96,165,250,.28),
+    0 0 36px rgba(96,165,250,.18);
+  animation: pulseGlow 1.8s ease-in-out infinite;
+}
+
+@keyframes pulseGlow{
+  0%,100%{
+    transform:scale(1);
+    text-shadow:
+      0 0 8px rgba(96,165,250,.30),
+      0 0 18px rgba(96,165,250,.28),
+      0 0 36px rgba(96,165,250,.18);
+  }
+  50%{
+    transform:scale(1.02);
+    text-shadow:
+      0 0 10px rgba(96,165,250,.45),
+      0 0 24px rgba(96,165,250,.38),
+      0 0 44px rgba(96,165,250,.25);
+  }
+}
+
+.status{
+  margin:0;
+  font-size:clamp(17px, 2.3vw, 24px);
+  color:var(--muted);
+  font-weight:700;
+}
+
+.note{
+  margin-top:14px;
+  font-size:13px;
+  color:var(--muted);
+  opacity:.9;
+}
+
+.live-mode .big{
+  color:#dcfce7;
+  text-shadow:
+    0 0 10px rgba(34,197,94,.45),
+    0 0 28px rgba(34,197,94,.32),
+    0 0 52px rgba(34,197,94,.18);
+  animation: livePulse 1.2s ease-in-out infinite;
+}
+
+@keyframes livePulse{
+  0%,100%{ transform:scale(1) }
+  50%{ transform:scale(1.04) }
+}
+
+.live-mode .status{
+  color:#bbf7d0;
+}
+
+.live-badge{
+  display:inline-block;
+  margin-bottom:14px;
+  padding:8px 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);
+  color:#dbeafe;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.live-mode .live-badge{
+  background:rgba(34,197,94,.16);
+  color:#dcfce7;
+  border-color:rgba(34,197,94,.28);
+  box-shadow:0 0 20px rgba(34,197,94,.18);
+}
+
+/* floating logos */
+.float-logo{
+  position:fixed;
+  width:110px;
+  height:auto;
+  z-index:5;
+  pointer-events:none;
+  user-select:none;
+  opacity:.96;
+  filter:drop-shadow(0 12px 25px rgba(0,0,0,.5));
+  will-change:transform;
+}
+
+@media (max-width: 900px){
+  .float-logo{ width:88px; }
+}
+
+@media (max-width: 640px){
+  .float-logo{ width:68px; }
+  .card{ padding:24px 18px 20px; }
+}
+</style>
+</head>
+<body>
+
+<img id="logo1" class="float-logo" src="logo.png" alt="Logo 1">
+<img id="logo2" class="float-logo" src="logo2.png" alt="Logo 2">
+<img id="logo3" class="float-logo" src="logo3.png" alt="Logo 3">
+
+<div class="wrap">
+  <div class="card" id="card">
+    <div class="live-badge" id="badge">Tonight at 8:00 PM</div>
+    <h1>Countdown to Episode 3</h1>
+    <p class="sub" id="sub">Premieres tonight at 8:00 PM</p>
+    <div class="big" id="countdown">--:--:--</div>
+    <p class="status" id="status">Counting down…</p>
+    <div class="note" id="targetText"></div>
+  </div>
+</div>
+
+<script>
+const countdownEl = document.getElementById("countdown");
+const statusEl = document.getElementById("status");
+const targetTextEl = document.getElementById("targetText");
+const cardEl = document.getElementById("card");
+const badgeEl = document.getElementById("badge");
+const subEl = document.getElementById("sub");
+
+function getTonightAt8() {
+  const target = new Date();
+  target.setHours(20, 0, 0, 0);
+  return target;
+}
+
+function formatTarget(date) {
+  return date.toLocaleString([], {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function updateCountdown() {
+  const now = new Date();
+  const target = getTonightAt8();
+  const diff = target - now;
+
+  targetTextEl.textContent = "Target time: " + formatTarget(target);
+
+  if (diff <= 0) {
+    countdownEl.textContent = "LIVE";
+    statusEl.textContent = "Episode 3 is on now";
+    badgeEl.textContent = "Now Streaming";
+    subEl.textContent = "Episode 3 is live";
+    cardEl.classList.add("live-mode");
+    return;
+  }
+
+  cardEl.classList.remove("live-mode");
+
+  const hours = Math.floor(diff / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
+
+  countdownEl.textContent =
+    String(hours).padStart(2, "0") + ":" +
+    String(minutes).padStart(2, "0") + ":" +
+    String(seconds).padStart(2, "0");
+
+  statusEl.textContent = "Counting down…";
+  badgeEl.textContent = "Tonight at 8:00 PM";
+  subEl.textContent = "Premieres tonight at 8:00 PM";
+}
+
+class FloatingLogo {
+  constructor(el, opts) {
+    this.el = el;
+    this.size = opts.size || 110;
+    this.x = opts.startX || 0;
+    this.y = opts.startY || 0;
+    this.vx = opts.vx || 1.2;
+    this.vy = opts.vy || 0.9;
+    this.rot = opts.rot || 0;
+    this.rotSpeed = opts.rotSpeed || 0.05;
+    this.margin = opts.margin || 8;
+    this.flyInDuration = opts.flyInDuration || 1400;
+    this.flyInStart = performance.now();
+    this.flyInFromX = opts.flyInFromX;
+    this.flyInFromY = opts.flyInFromY;
+    this.ready = false;
+
+    this.el.addEventListener("load", () => {
+      this.ready = true;
+      this.measure();
+    }, { once:true });
+
+    if (this.el.complete) {
+      this.ready = true;
+      this.measure();
+    }
+  }
+
+  measure() {
+    const r = this.el.getBoundingClientRect();
+    this.w = r.width || this.size;
+    this.h = r.height || this.size;
+  }
+
+  update(now) {
+    if (!this.ready) return;
+    if (!this.w || !this.h) this.measure();
+
+    const maxX = window.innerWidth - this.w - this.margin;
+    const maxY = window.innerHeight - this.h - this.margin;
+
+    const flyElapsed = now - this.flyInStart;
+    if (flyElapsed < this.flyInDuration) {
+      const t = flyElapsed / this.flyInDuration;
+      const e = 1 - Math.pow(1 - t, 3);
+      const cx = this.flyInFromX + (this.x - this.flyInFromX) * e;
+      const cy = this.flyInFromY + (this.y - this.flyInFromY) * e;
+      const r = this.rot * e;
+      this.el.style.transform = `translate(${cx}px, ${cy}px) rotate(${r}deg)`;
+      return;
+    }
+
+    this.x += this.vx;
+    this.y += this.vy;
+    this.rot += this.rotSpeed;
+
+    if (this.x <= this.margin) {
+      this.x = this.margin;
+      this.vx *= -1;
+    } else if (this.x >= maxX) {
+      this.x = maxX;
+      this.vx *= -1;
+    }
+
+    if (this.y <= this.margin) {
+      this.y = this.margin;
+      this.vy *= -1;
+    } else if (this.y >= maxY) {
+      this.y = maxY;
+      this.vy *= -1;
+    }
+
+    this.el.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rot}deg)`;
+  }
+}
+
+const logos = [
+  new FloatingLogo(document.getElementById("logo1"), {
+    size: 110,
+    startX: Math.max(20, window.innerWidth * 0.08),
+    startY: Math.max(20, window.innerHeight * 0.12),
+    vx: 1.25,
+    vy: 0.95,
+    rot: -8,
+    rotSpeed: 0.06,
+    flyInFromX: -180,
+    flyInFromY: 40,
+    flyInDuration: 1400
+  }),
+  new FloatingLogo(document.getElementById("logo2"), {
+    size: 110,
+    startX: Math.max(20, window.innerWidth * 0.80),
+    startY: Math.max(20, window.innerHeight * 0.18),
+    vx: -1.12,
+    vy: 0.88,
+    rot: 10,
+    rotSpeed: -0.05,
+    flyInFromX: window.innerWidth + 180,
+    flyInFromY: 80,
+    flyInDuration: 1600
+  }),
+  new FloatingLogo(document.getElementById("logo3"), {
+    size: 110,
+    startX: Math.max(20, window.innerWidth * 0.16),
+    startY: Math.max(20, window.innerHeight * 0.72),
+    vx: 1.05,
+    vy: -0.92,
+    rot: -6,
+    rotSpeed: 0.045,
+    flyInFromX: -160,
+    flyInFromY: window.innerHeight + 120,
+    flyInDuration: 1750
+  })
+];
+
+function animate(now) {
+  for (const logo of logos) {
+    logo.update(now);
+  }
+  requestAnimationFrame(animate);
+}
+
+window.addEventListener("resize", () => {
+  for (const logo of logos) {
+    logo.measure();
+    const maxX = window.innerWidth - (logo.w || 0) - logo.margin;
+    const maxY = window.innerHeight - (logo.h || 0) - logo.margin;
+    logo.x = Math.min(Math.max(logo.margin, logo.x), Math.max(logo.margin, maxX));
+    logo.y = Math.min(Math.max(logo.margin, logo.y), Math.max(logo.margin, maxY));
+  }
+});
+
+updateCountdown();
+setInterval(updateCountdown, 1000);
+requestAnimationFrame(animate);
+</script>
+
+</body>
+</html>
